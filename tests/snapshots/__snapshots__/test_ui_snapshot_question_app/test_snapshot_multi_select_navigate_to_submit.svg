@@ -1,0 +1,8 @@
+MultiSelectApp
+Which features do you want to enable?
+1. [ ] Authentication - User login/logout
+2. [ ] Caching - Redis caching layer
+3. [ ] Logging - Structured logging
+Type your answer...
+› Submit →
+↑↓ navigate Enter toggle Esc cancel

@@ -1,0 +1,7 @@
+MultiQuestionApp
+DB ✓ [Framework]
+Which framework?
+› 1. FastAPI
+2. Django
+Type your answer...
+←→ questions ↑↓ navigate Enter select Esc cancel
