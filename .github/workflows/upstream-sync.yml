@@ -1,4 +1,4 @@
-name: Safe upstream fast-forward sync
+name: Conflict-aware upstream sync
 on:
   schedule:
     - cron: "15 14 * * 1"
@@ -15,18 +15,21 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
-      - name: Fast-forward from original repository only
+      - name: Merge upstream if there are no conflicts
         shell: bash
         run: |
           set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BEFORE="$(git rev-parse HEAD)"
           git fetch --no-tags https://github.com/BlackTechX011/Hacxgent.git HEAD
-          if git diff --quiet HEAD FETCH_HEAD; then
-            echo "Already synchronized"
+          if ! git merge --no-edit FETCH_HEAD; then
+            git merge --abort || true
+            echo "::warning::Upstream merge conflict; no changes pushed. Review upstream changes manually."
             exit 0
           fi
-          if ! git merge-base --is-ancestor HEAD FETCH_HEAD; then
-            echo "::warning::Fork diverged from upstream; skipped. Manual review required."
+          if [ "$BEFORE" = "$(git rev-parse HEAD)" ]; then
+            echo "Up to date"
             exit 0
           fi
-          git merge --ff-only FETCH_HEAD
           git push origin HEAD:"${{ github.event.repository.default_branch }}"
