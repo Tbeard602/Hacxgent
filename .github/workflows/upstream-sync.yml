@@ -1,0 +1,32 @@
+name: Safe upstream fast-forward sync
+on:
+  schedule:
+    - cron: "15 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Fast-forward from original repository only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags https://github.com/BlackTechX011/Hacxgent.git HEAD
+          if git diff --quiet HEAD FETCH_HEAD; then
+            echo "Already synchronized"
+            exit 0
+          fi
+          if ! git merge-base --is-ancestor HEAD FETCH_HEAD; then
+            echo "::warning::Fork diverged from upstream; skipped. Manual review required."
+            exit 0
+          fi
+          git merge --ff-only FETCH_HEAD
+          git push origin HEAD:"${{ github.event.repository.default_branch }}"
